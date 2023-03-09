@@ -8,11 +8,11 @@
 using namespace std;
 using namespace std::chrono;
 
-void PrintMatrix (double** pMatrix, int RowCount, int ColCount) {
+void PrintMatrix (double** matrix, int n) {
     int i, j; // Loop variables
-    for (i=0; i<RowCount; i++) {
-        for (j=0; j<ColCount; j++)
-            cout << pMatrix[i][j];
+    for (i=0; i<n; i++) {
+        for (j=0; j<n; j++)
+            cout << matrix[i][j] << " ";
         printf("\n");
     }
 }
@@ -23,34 +23,31 @@ void PrintVector (double pVector[], int Size) {
         printf("%7.4f ", pVector[i]);
 }
 
-// Function that gets the timestamp in seconds
 
-double CountRow(int from, int i, int n, double** matrix, double* res_vector){
-    double res_of_sum;
-
-    for (int j = from; j < n; j++){
-        res_of_sum += matrix[i][j] * res_vector[j];
-    }
-
-    return res_of_sum;
-
-}
-double* RelaxationMethod(double** matrix, double b_vector[], double res_vector[], int n, double omega) {
+double* RelaxationMethod(double** matrix, double* b_vector, double* res_vector, int n, double omega) {
 	int i, j, k = 0;
     for (int i = 0; i < n; i++) {
-        res_vector[i] = 0;
+        res_vector[i] = 1;
     }
+    double sum;
+    #pragma omp parallel for reduction(+ : sum)
     for (int i = 0; i < n; i++) {
-            double sum = 0.0;
-            // for (int j = 0; j < n; j++) {
-            //     if (i != j) {
-            //         sum += matrix[i][j] * res_vector[j];
-            //     }
-            // }
+            sum = 0.0;
+            #pragma omp parallel for
 
-            double new_x = (1 - omega) * res_vector[i] + (omega * ( (b_vector[i] - CountRow(1,i, i - 1, matrix, res_vector) 
-                                                                               - CountRow(i + 1,i ,n, matrix, res_vector)) / matrix[i][i] )); 
+            for(int j=0; j<i; j++)
+            {
+                sum += matrix[i][j]*res_vector[j];
+            }
+            #pragma omp parallel for
+
+            for(int j=i+1; j<n; j++)
+            {
+                sum += matrix[i][j]*res_vector[j];
+            }
+            double new_x = (1 - omega) * res_vector[i] + (omega * ((b_vector[i] -  sum) / matrix[i][i] )); 
             res_vector[i] = new_x;
+
         }
     return res_vector;
 }
@@ -58,7 +55,9 @@ int main()
 {
 	setlocale(LC_CTYPE, "RUSSIAN");
     int n;
-    int omega;
+    srand(time(NULL));
+    omp_set_num_threads(4);
+    double omega;
     cout << "Введите размерность матрицы:";
     cin >> n;
     cout << endl;
@@ -69,35 +68,35 @@ int main()
     double** matrix = new double* [n];
     for (int i = 0; i < n; i++)
         matrix[i] = new double [n];
-    double* vector = new double[n];
-
-    double* b_vector = new double[n];
-    //Заполнение
-    double x;
+            double x;
+    
     for (int i =0; i < n; i++) {
         for (int j =0; j < n; j++) {
-            cin >> x;
-            matrix[i][j] = x;
+            matrix[i][j] = rand() % 100;
         }
     }
-    for (int i = 0; i < n; i++){
-        cin >> x;
-        b_vector[i] = x; 
-    } 
-    
+    double* b_vector = new double[n];
 
-    printf("Initial Matrix \n");
-    PrintMatrix(matrix, n, n);
+        //Заполнение
+
+    for (int i = 0; i < n; i++){
+        b_vector[i] = rand() % 100; 
+    } 
+    double* vector = new double[n];
+
+
+    //cout << "Initial matrix: " << endl;
+    //PrintMatrix(matrix, n);
     
     steady_clock::time_point start = steady_clock::now();
-    RelaxationMethod(matrix, vector,b_vector, n, omega);
+    vector = RelaxationMethod(matrix, b_vector,vector, n, omega);
     steady_clock::time_point finish = steady_clock::now();
     duration<double> diff = finish - start;
     
     
     //The matrix and the vector output
-    printf("\nResult Vector \n");
-    PrintVector(vector, n);
+    //printf("\nResult Vector \n");
+    //PrintVector(vector, n);
     cout <<"\n Time of execution: " << diff.count() << endl;
     //printf("\n Time of execution: %lld\n", diff.count());
  // Computational process termination
