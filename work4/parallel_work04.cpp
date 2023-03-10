@@ -186,7 +186,6 @@ int main(){
     // PrintMatrix(pMatrix, Size, Size);
     // printf("Initial Vector \n");
     // PrintVector(pVector, Size);
-    
     steady_clock::time_point start = steady_clock::now();
     //start = omp_get_wtime();
     ParallelResultCalculation(pMatrix, pVector, pResult, Size);

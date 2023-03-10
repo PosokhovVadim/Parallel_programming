@@ -2,6 +2,8 @@
     "files.associations": {
         "cmath": "cpp",
         "iostream": "cpp",
-        "mutex": "cpp"
+        "mutex": "cpp",
+        "condition_variable": "cpp",
+        "new": "cpp"
     }
 }
