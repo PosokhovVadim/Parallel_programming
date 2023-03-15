@@ -10,7 +10,7 @@ using namespace std::chrono;
 #define PI 3.1415926535897932384626433832795
 
 double func(double x, double y){
-    return pow(EXP, (sin(PI * x) * cos(PI * y))) + 1.0;
+    return pow(EXP, (sin(PI * x) * cos(PI * y))) + 1;
 }
 
 

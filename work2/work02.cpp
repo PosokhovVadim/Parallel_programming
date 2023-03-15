@@ -7,7 +7,7 @@
 using namespace std;
 using namespace std::chrono;
 #define EXP 2.718281828459045235360287471352
-#define PI 3.1415926535897932384626433832795
+#define PI 3.141592653589793238462643383279
 
 double func(double x, double y){
     return pow(EXP, (sin(PI * x) * cos(PI * y))) + 1.0;

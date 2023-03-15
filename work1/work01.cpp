@@ -55,7 +55,7 @@ double experiment(double *res, double f(double, double, double)){
     double stime, ftime; // время начала и конца расчета
     double a, b, h;
     a = 0.0;
-    b = 1000000;
+    b = 100000;
     h = 0.001; 
     steady_clock::time_point start = steady_clock::now();
     *res = f(a, b, h);
